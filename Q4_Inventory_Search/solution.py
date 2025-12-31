@@ -3,27 +3,40 @@ Logic Forge Week 1 - Challenge 4: The Deep Storage Inventory Search
 Author: [Your Name]
 """
 
-# --- Initial Approach: Brute Force (Flatten & Sort) ---
-# Logic: Treat the 2D matrix as one big bag of numbers.
-# Pull them all out, sort them, and pick the k-th one.
-# Time Complexity: O(N^2 log(N^2)) - Very slow for large warehouses.
-# Space Complexity: O(N^2) - Uses a lot of extra memory.
+# --- Optimized Approach: Binary Search on Value Range ---
+# Logic: Instead of sorting indices, we guess a value 'mid' 
+# and count how many numbers in the matrix are <= mid.
+# Time Complexity: O(N * log(Max-Min)) - Much faster and uses O(1) memory.
+
+def count_less_equal(matrix, mid):
+    """ Helper: Counts how many numbers in matrix are <= mid """
+    count = 0
+    n = len(matrix)
+    # Start from bottom-left corner
+    row, col = n - 1, 0
+    while row >= 0 and col < n:
+        if matrix[row][col] <= mid:
+            # If current is <= mid, then everything above it is also <= mid
+            count += (row + 1)
+            col += 1
+        else:
+            row -= 1
+    return count
 
 def kth_smallest(matrix, k):
-    # 1. Flatten the 2D matrix into a single list
-    all_elements = []
-    for row in matrix:
-        for num in row:
-            all_elements.append(num)
+    n = len(matrix)
+    low, high = matrix[0][0], matrix[n-1][n-1]
     
-    # 2. Sort the entire list
-    all_elements.sort()
-    
-    # 3. Return the k-th smallest (index is k-1)
-    return all_elements[k-1]
+    while low < high:
+        mid = (low + high) // 2
+        if count_less_equal(matrix, mid) < k:
+            low = mid + 1
+        else:
+            high = mid
+    return low
 
 # --- Testing ---
 if __name__ == "__main__":
     matrix = [[1, 5, 9], [10, 11, 13], [12, 13, 15]]
     k = 8
-    print(f"Brute Force Result: {kth_smallest(matrix, k)}")
+    print(f"Optimized Result: {kth_smallest(matrix, k)}")
